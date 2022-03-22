@@ -160,7 +160,7 @@ async function run(){
             const query = { _id :ObjectId(id)}
             const result = await reviewCollection.updateOne(query, {
                 $set: {
-                    status: updateInfo.ship
+                    approved: updateInfo.approv
                 }
             });
             res.send(result);
