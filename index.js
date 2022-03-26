@@ -74,6 +74,14 @@ async function run(){
             const result = await orderCollection.find({ email : email }).toArray();
             res.send(result);
         })
+        // get my orders by Id
+        app.get('/appoint/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id :ObjectId(id)}
+            const result = await orderCollection.findOne(query);
+            res.send(result);
+        })
+       
         // delete order
         app.delete('/deleteOrde/:id', async (req, res) => {
             const id = req.params.id;
