@@ -6,9 +6,11 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 const stripe = require('stripe')(process.env.STRIPE_SECRET)
+const fileUpload = require('express-fileupload')
 
 app.use(cors());
 app.use(express.json());
+app.use(fileUpload());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mgtwv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -27,6 +29,7 @@ async function run(){
         const orderCollection = database.collection("Orders");
         const userCollection = database.collection("users");
         const reviewCollection = database.collection("review");
+        const doctorsCollection = database.collection("doctors");
 
         //Load API 
         app.get('/services', async (req, res) => {
@@ -198,6 +201,32 @@ async function run(){
 
             });
             res.send({ clientSecret: paymentIntent.client_secret })
+        })
+
+        // doctors img collection
+        app.get('/getdoctors', async (req, res) => {
+            const cursor = doctorsCollection.find({});
+            const doctors = await cursor.toArray();
+            res.send(doctors);
+        })
+
+        app.post('/doctors', async (req, res) => {
+            const name = req.body.title;
+            const email = req.body.image;
+            const details = req.body.details;
+            const pic = req.files.picture;
+            console.log(pic)
+            const picData = pic.data;
+            console.log(picData)
+            const endodedPic = picData.toString('base64');
+            const imgBuffer = Buffer.from(endodedPic, 'base64')
+            const doctor = {
+                name,
+                email,
+                image: imgBuffer
+            }
+            const result = await doctorsCollection.insertOne(doctor)
+            res.send(result)
         })
         
     //    --------------- cpied from --------------
